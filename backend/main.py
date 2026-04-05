@@ -18,3 +18,9 @@ app.include_router(predict_router)
 app.include_router(accounts_router)
 from backend.api.alerts import router as alerts_router
 app.include_router(alerts_router)
+import os
+import uvicorn
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=port)
