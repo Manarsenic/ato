@@ -58,7 +58,7 @@ def predict_risk(data: dict):
         df = df.reindex(columns=FEATURE_COLUMNS)
 
         # ✅ Transform using preprocessor
-        X_processed = df.values
+        X_processed = df.copy()
 
         # ✅ Model predictions
         rf_prob = float(rf_model.predict_proba(X_processed)[0][1])
