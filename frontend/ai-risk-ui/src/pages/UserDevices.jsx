@@ -1,52 +1,68 @@
-import { Link } from "react-router-dom"
+import { useEffect, useState } from "react"
+import axios from "axios"
 
-function UserDevices(){
+export default function UserDevices(){
 
-const devices=[
-{name:"Chrome - Windows",location:"Mumbai"},
-{name:"Safari - iPhone",location:"Delhi"}
-]
+  const [data,setData] = useState([])
 
-return(
+  const userId = localStorage.getItem("user_id")
 
-<div className="p-10">
+  useEffect(()=>{
 
-<Link
-to="/user"
-className="text-blue-500 hover:underline"
->
-← Back to Dashboard
-</Link>
+    axios
+      .get(`http://127.0.0.1:8000/accounts/${userId}`)
+      .then(res=>{
+        setData(res.data.accounts)
+      })
 
-<h1
-className="text-3xl mt-4 mb-6"
-style={{fontFamily:"Sora"}}
->
-My Devices
-</h1>
+  },[])
 
-<div className="glass rounded-2xl p-6">
+  return(
 
-{devices.map((d,i)=>(
-<div key={i} className="border-b py-4">
+    <div className="page">
 
-<p className="font-semibold">
-{d.name}
-</p>
+      <h1 className="text-3xl font-semibold mb-8">
+        Login History
+      </h1>
 
-<p className="text-gray-500 text-sm">
-{d.location}
-</p>
+      <div className="glass section">
 
-</div>
-))}
+        <table className="w-full">
 
-</div>
+          <thead>
 
-</div>
+            <tr className="text-left">
+              <th>City</th>
+              <th>Device</th>
+              <th>Amount</th>
+              <th>Risk Score</th>
+            </tr>
 
-)
+          </thead>
+
+          <tbody>
+
+            {data.map((d,i)=>(
+
+              <tr key={i}>
+
+                <td>{d.city}</td>
+                <td>{d.device}</td>
+                <td>${d.amount}</td>
+                <td>{d.risk_score.toFixed(2)}</td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  )
 
 }
-
-export default UserDevices

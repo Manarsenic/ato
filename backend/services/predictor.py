@@ -55,14 +55,14 @@ def predict_risk(data: dict):
     # Create dataframe
     df = pd.DataFrame([[mapped_data[col] for col in FEATURE_COLUMNS]], columns=FEATURE_COLUMNS)
 
-    # Random Forest
-    rf_prob = rf_model.predict_proba(df)[0][1]
-
-    # XGBoost
-    xgb_prob = xgb_model.predict_proba(df)[0][1]
-
-    # Autoencoder
+    # Apply preprocessing to features
     X_processed = preprocessor.transform(df)
+
+# Random Forest
+    rf_prob = rf_model.predict_proba(X_processed)[0][1]
+
+# XGBoost
+    xgb_prob = xgb_model.predict_proba(X_processed)[0][1]
 
     reconstructed = autoencoder.predict(X_processed)
 

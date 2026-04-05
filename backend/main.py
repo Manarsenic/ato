@@ -16,3 +16,5 @@ app.add_middleware(
 
 app.include_router(predict_router)
 app.include_router(accounts_router)
+from backend.api.alerts import router as alerts_router
+app.include_router(alerts_router)

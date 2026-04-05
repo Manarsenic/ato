@@ -1,33 +1,41 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import {
+LineChart,
+Line,
+XAxis,
+YAxis,
+Tooltip,
+CartesianGrid,
+ResponsiveContainer
+} from "recharts"
 
-const data = [
-{time:"10:00",risk:0.2},
-{time:"11:00",risk:0.4},
-{time:"12:00",risk:0.7},
-{time:"13:00",risk:0.5},
-{time:"14:00",risk:0.9},
-]
+export default function RiskChart({ data }) {
 
-function RiskChart(){
+if(!data || data.length === 0){
+return (
+<div style={{height:300,display:"flex",alignItems:"center",justifyContent:"center"}}>
+No data available for chart
+</div>
+)
+}
+
+const chartData = data.map((d,i)=>({
+index:i+1,
+risk:d.risk_score ?? 0
+}))
 
 return(
 
-<div className="glass rounded-3xl p-6 h-[300px]">
+<div style={{width:"100%",height:300}}>
 
-<h2
-className="text-lg mb-4 font-semibold"
-style={{fontFamily:"Sora"}}
->
-Risk Activity
-</h2>
+<ResponsiveContainer>
 
-<ResponsiveContainer width="100%" height="100%">
+<LineChart data={chartData}>
 
-<LineChart data={data}>
+<CartesianGrid strokeDasharray="3 3"/>
 
-<XAxis dataKey="time"/>
+<XAxis dataKey="index"/>
 
-<YAxis/>
+<YAxis domain={[0,1]}/>
 
 <Tooltip/>
 
@@ -36,6 +44,7 @@ type="monotone"
 dataKey="risk"
 stroke="#6366f1"
 strokeWidth={3}
+dot={{r:4}}
 />
 
 </LineChart>
@@ -47,5 +56,3 @@ strokeWidth={3}
 )
 
 }
-
-export default RiskChart

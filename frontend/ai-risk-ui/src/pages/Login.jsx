@@ -7,21 +7,63 @@ const nav = useNavigate()
 
 const [user,setUser] = useState("")
 const [pass,setPass] = useState("")
+const [loading,setLoading] = useState(false)
 
-function handleLogin(){
+async function handleLogin(){
 
-if(user==="admin" && pass==="admin123"){
-nav("/admin")
+setLoading(true)
+
+try{
+
+const res = await fetch("http://127.0.0.1:8000/login",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body: JSON.stringify({
+user:user,
+password:pass
+})
+})
+
+const data = await res.json()
+
+// 🔒 ACCOUNT LOCKED
+if(!data.success && data.message === "Account locked"){
+alert(
+`🔒 Your account is locked\n\nReason: ${data.reason}\n\nPlease contact admin.`
+)
+setLoading(false)
+return
 }
 
-else if(user==="user" && pass==="user123"){
+// 🔐 OTP REQUIRED
+if(!data.success && data.message === "OTP required"){
+alert(
+`🔐 Additional verification required\n\nPlease contact admin for access.`
+)
+setLoading(false)
+return
+}
+
+// ❌ INVALID LOGIN
+if(!data.success){
+alert(data.message || "Login failed")
+setLoading(false)
+return
+}
+
+// ✅ SUCCESS LOGIN
+if(data.role==="admin"){
+nav("/admin")
+}else{
+localStorage.setItem("user_id", user)
 nav("/user")
 }
 
-else{
-alert("Invalid credentials")
+}catch(e){
+alert("Server error")
 }
 
+setLoading(false)
 }
 
 return(
@@ -38,7 +80,7 @@ Account Security Intelligence Platform
 
 <input
 className="login-input"
-placeholder="Username"
+placeholder="User ID"
 value={user}
 onChange={e=>setUser(e.target.value)}
 />
@@ -51,13 +93,18 @@ value={pass}
 onChange={e=>setPass(e.target.value)}
 />
 
-<button className="login-btn" onClick={handleLogin}>
-Sign In
+<button
+className="login-btn"
+onClick={handleLogin}
+disabled={loading}
+>
+{loading ? "Signing in..." : "Sign In"}
 </button>
 
 <div className="demo">
-Admin → admin / admin123  
-User → user / user123
+Admin → admin/admin123 <br/>
+Users → any user id + password user123 <br/>
+Example: user1 / user123
 </div>
 
 </div>

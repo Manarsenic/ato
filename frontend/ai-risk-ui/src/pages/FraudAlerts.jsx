@@ -9,12 +9,14 @@ const [lastUpdated,setLastUpdated] = useState("")
 const [caseStatus,setCaseStatus] = useState("Active Alert")
 const [notes,setNotes] = useState("")
 
+
 /* ---------- FETCH DATA ---------- */
 
-const fetchAlerts = () => {
+const fetchAlerts = async () => {
 
-axios.get("http://127.0.0.1:8000/accounts")
-.then(res => {
+try{
+
+const res = await axios.get("http://127.0.0.1:8000/accounts")
 
 const topRisk = res.data.accounts
 .filter(a => a.risk_score >= 0.75)
@@ -25,22 +27,27 @@ setAlerts(topRisk)
 
 setLastUpdated(new Date().toLocaleTimeString())
 
-if(!selected && topRisk.length > 0){
-setSelected(topRisk[0])
+// ✅ FIX: always keep correct selected user
+if(topRisk.length > 0){
+setSelected(prev => {
+if(!prev) return topRisk[0]
+
+// if previously selected still exists, keep it
+const exists = topRisk.find(u => u.user === prev.user)
+return exists || topRisk[0]
+})
 }
 
-})
+}catch(e){
+console.log("Fetch error", e)
+}
 
 }
 
 useEffect(()=>{
-
 fetchAlerts()
-
 const interval = setInterval(fetchAlerts,10000)
-
 return ()=>clearInterval(interval)
-
 },[])
 
 
@@ -70,18 +77,79 @@ return reasons
 }
 
 
-/* ---------- ACTION HANDLERS ---------- */
+/* ---------- 🔥 ACTION HANDLERS (FIXED) ---------- */
 
-const triggerOTP = () => {
-setCaseStatus("Step-Up Authentication Triggered")
+const triggerOTP = async () => {
+
+if(!selected) return alert("Select user first")
+
+try{
+await axios.post("http://127.0.0.1:8000/trigger_otp",{
+user: selected.user
+})
+
+setCaseStatus(`OTP triggered for ${selected.user}`)
+
+}catch(e){
+alert("OTP failed")
 }
 
-const lockAccount = () => {
-setCaseStatus("Account Temporarily Locked")
 }
 
-const investigate = () => {
-setCaseStatus("Under Investigation")
+const lockAccount = async () => {
+
+if(!selected) return alert("Select user first")
+
+try{
+await axios.post("http://127.0.0.1:8000/lock_account",{
+user: selected.user,
+reason: "High risk transaction detected"
+})
+
+setCaseStatus(`Account locked: ${selected.user}`)
+
+}catch(e){
+alert("Lock failed")
+}
+
+}
+
+const unlockAccount = async () => {
+
+if(!selected) return alert("Select user first")
+
+try{
+await axios.post("http://127.0.0.1:8000/unlock_account",{
+user: selected.user
+})
+
+setCaseStatus(`Account unlocked: ${selected.user}`)
+
+}catch(e){
+alert("Unlock failed")
+}
+
+}
+
+const investigate = async () => {
+
+if(!selected) return alert("Select user first")
+if(!notes) return alert("Add investigation notes")
+
+try{
+
+await axios.post("http://127.0.0.1:8000/send_alert",{
+user: selected.user,
+message: notes
+})
+
+setCaseStatus(`Alert sent to ${selected.user}`)
+setNotes("")
+
+}catch(e){
+alert("Investigation failed")
+}
+
 }
 
 
@@ -111,9 +179,7 @@ Top risk accounts • Last updated {lastUpdated}
 Real-Time Fraud Monitoring
 </h2>
 
-{alerts.map((a,i)=>{
-
-return(
+{alerts.map((a,i)=>(
 
 <div
 key={i}
@@ -122,35 +188,42 @@ onClick={()=>setSelected(a)}
 >
 
 <div className="fraud-user">
+<div className="flex gap-2 items-center">
+
 <strong>{a.user}</strong>
+
+{a.locked && (
+<span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
+LOCKED
+</span>
+)}
+
+{a.otp_required && (
+<span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded">
+OTP
+</span>
+)}
+
+</div>
 </div>
 
-
 <div className="fraud-score">
-
 <span className="score-value">
 {a.risk_score.toFixed(2)}
 </span>
-
 <span>/1.0</span>
-
 </div>
 
-
 <div className="risk-bar">
-
 <div
 className="risk-fill"
 style={{width:`${a.risk_score*100}%`}}
 />
-
 </div>
 
 </div>
 
-)
-
-})}
+))}
 
 </div>
 
@@ -169,49 +242,26 @@ Account Deep Dive: <span>{selected.user}</span>
 Status: <strong>{caseStatus}</strong>
 </p>
 
-
-{/* Risk Score Circle */}
-
 <div className="risk-circle">
-
 <div className="circle-score">
 {selected.risk_score.toFixed(2)}
 </div>
-
 </div>
-
-
-{/* Account Info */}
 
 <div className="account-details">
-
 <p><strong>Action:</strong> {selected.action}</p>
-
-<p><strong>Amount:</strong> ${selected.amount?.toLocaleString()}</p>
-
+<p><strong>Amount:</strong> ₹{selected.amount?.toLocaleString("en-IN")}</p>
 <p><strong>City:</strong> {selected.city}</p>
-
-<p><strong>Device:</strong> {selected.device || "Mobile Device"}</p>
-
-<p><strong>Transaction Type:</strong> {selected.transaction_type || "Financial Event"}</p>
-
+<p><strong>Device:</strong> {selected.device}</p>
 </div>
-
-
-{/* AI EXPLANATION */}
 
 <h3 className="mt-4">AI Risk Explanation</h3>
 
 <ul className="indicator-list">
-
 {getIndicators(selected).map((r,i)=>(
 <li key={i}>⚠ {r}</li>
 ))}
-
 </ul>
-
-
-{/* INVESTIGATION NOTES */}
 
 <h3 className="mt-4">Investigation Notes</h3>
 
@@ -222,29 +272,21 @@ value={notes}
 onChange={(e)=>setNotes(e.target.value)}
 />
 
-
-{/* ACTION BUTTONS */}
-
 <div className="fraud-actions">
 
-<button
-className="btn-primary"
-onClick={triggerOTP}
->
+<button className="btn-primary" onClick={triggerOTP}>
 Trigger Step-Up Auth (OTP)
 </button>
 
-<button
-className="btn-warning"
-onClick={lockAccount}
->
+<button className="btn-warning" onClick={lockAccount}>
 Temporary Lock Account
 </button>
 
-<button
-className="btn-neutral"
-onClick={investigate}
->
+<button className="btn-success" onClick={unlockAccount}>
+Unlock Account
+</button>
+
+<button className="btn-neutral" onClick={investigate}>
 Dismiss / Investigate
 </button>
 

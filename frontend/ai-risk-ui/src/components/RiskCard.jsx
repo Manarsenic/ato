@@ -1,29 +1,33 @@
-export default function RiskCard({ title, value, status }) {
+import { useNavigate } from "react-router-dom"
 
-  const getColor = () => {
-    if (status === "high") return "text-red-400";
-    if (status === "medium") return "text-yellow-400";
-    if (status === "low") return "text-green-400";
-    return "text-blue-400";
-  };
+export default function RiskCard({ title, value, link }) {
 
-  return (
-    <div className="bg-white/10 backdrop-blur-lg border border-white/10 p-6 rounded-xl shadow-md hover:scale-105 transition-all">
+const navigate = useNavigate()
 
-      <p className="text-gray-400 text-sm mb-2">
-        {title}
-      </p>
+const handleClick = () => {
+if(link){
+navigate(link)
+}
+}
 
-      <h2 className={`text-3xl font-bold ${getColor()}`}>
-        {value}
-      </h2>
+return(
 
-      {status && (
-        <p className="text-xs text-gray-400 mt-2 uppercase">
-          {status} risk
-        </p>
-      )}
+<div
+className="glass p-5 rounded-xl shadow-md hover:scale-105 transition"
+onClick={handleClick}
+style={{cursor: link ? "pointer" : "default"}}
+>
 
-    </div>
-  );
+<h4 className="text-gray-400 text-sm mb-2">
+{title}
+</h4>
+
+<p className="text-3xl font-semibold text-blue-500">
+{value}
+</p>
+
+</div>
+
+)
+
 }

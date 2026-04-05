@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect,useState } from "react"
 import axios from "axios"
 
 export default function LiveMonitoring(){
@@ -6,13 +6,19 @@ export default function LiveMonitoring(){
 const [logs,setLogs] = useState([])
 const [lastUpdated,setLastUpdated] = useState("")
 
-const fetchData = () => {
+const fetchData = async ()=>{
 
-axios.get("http://127.0.0.1:8000/accounts")
-.then(res=>{
+try{
+
+const res = await axios.get("http://127.0.0.1:8000/accounts")
+
 setLogs(res.data.accounts.slice(0,20))
+
 setLastUpdated(new Date().toLocaleTimeString())
-})
+
+}catch(e){
+console.log("Monitoring error",e)
+}
 
 }
 
@@ -26,25 +32,19 @@ return ()=>clearInterval(interval)
 
 },[])
 
+const getRiskClass = risk =>{
 
-
-/* ---------- RISK COLOR ---------- */
-
-const getRiskClass = (risk) => {
-
-if(risk >= 0.8) return "risk-high"
-if(risk >= 0.5) return "risk-medium"
-return "risk-low"
+if(risk>=0.8) return "bg-red-500"
+if(risk>=0.5) return "bg-yellow-500"
+return "bg-green-500"
 
 }
 
-
-
 return(
 
-<div className="page">
+<div className="page p-8">
 
-<h1 className="text-3xl font-semibold mb-4">
+<h1 className="text-3xl font-bold mb-4">
 Live Transaction Monitoring
 </h1>
 
@@ -52,52 +52,40 @@ Live Transaction Monitoring
 Last updated: {lastUpdated}
 </p>
 
+<div className="glass p-6">
 
-<div className="glass p-6 shadow-lg">
-
-<table className="monitor-table">
+<table className="w-full">
 
 <thead>
 
 <tr>
-
 <th>User</th>
 <th>Action</th>
 <th>Amount</th>
 <th>City</th>
 <th>Device</th>
 <th>Risk</th>
-
 </tr>
 
 </thead>
 
 <tbody>
 
-{logs.map((log,i)=>{
+{logs.map((log,i)=>(
 
-const riskClass = getRiskClass(log.risk_score)
-
-return(
-
-<tr
-key={i}
-className={log.risk_score > 0.8 ? "high-row" : ""}
->
+<tr key={i}>
 
 <td>{log.user}</td>
-
 <td>{log.action}</td>
-
-<td>${log.amount}</td>
-
+<td>₹{log.amount?.toLocaleString("en-IN")}</td>
 <td>{log.city}</td>
-
 <td>{log.device}</td>
 
 <td>
 
-<span className={`risk-badge ${riskClass}`}>
+<span
+className={`${getRiskClass(log.risk_score)} text-white px-2 py-1 rounded`}
+>
 
 {log.risk_score.toFixed(2)}
 
@@ -107,9 +95,7 @@ className={log.risk_score > 0.8 ? "high-row" : ""}
 
 </tr>
 
-)
-
-})}
+))}
 
 </tbody>
 
