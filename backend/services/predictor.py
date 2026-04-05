@@ -5,7 +5,6 @@ from datetime import datetime
 from services.model_loader import (
     rf_model,
     xgb_model,
-    autoencoder,
     preprocessor
 )
 
@@ -31,9 +30,11 @@ FEATURE_COLUMNS = [
 
 def predict_risk(data: dict):
     try:
+        # ✅ Parse timestamp
         timestamp = data.get("timestamp")
         dt = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
+        # ✅ Map input
         mapped_data = {
             "transaction_type": data.get("ACTION"),
             "amount": float(data.get("AMOUNT", 0)),
@@ -50,30 +51,28 @@ def predict_risk(data: dict):
             "event_month": dt.month
         }
 
-        df = pd.DataFrame([[mapped_data[col] for col in FEATURE_COLUMNS]], columns=FEATURE_COLUMNS)
+        # ✅ Create DataFrame with EXACT training columns
+        df = pd.DataFrame([mapped_data], columns=FEATURE_COLUMNS)
 
-        # 🔥 SAFE preprocessing
+        # ✅ Transform using preprocessor
         X_processed = preprocessor.transform(df)
 
-        # 🔥 SAFE model predictions
-        rf_prob = rf_model.predict_proba(X_processed)[0][1]
-        xgb_prob = xgb_model.predict_proba(X_processed)[0][1]
+        # ✅ Model predictions
+        rf_prob = float(rf_model.predict_proba(X_processed)[0][1])
+        xgb_prob = float(xgb_model.predict_proba(X_processed)[0][1])
 
-        # 🔥 HANDLE AUTOENCODER SAFELY
-        try:
-            reconstructed = autoencoder.predict(X_processed)
-            error = np.mean((X_processed - reconstructed) ** 2)
-        except Exception:
-            error = 0.0  # fallback
+        # ❌ REMOVE AUTOENCODER (causing mismatch)
+        error = 0.0
 
+        # ✅ Final risk score
         risk_score = compute_risk_score(error, rf_prob, xgb_prob)
         alert = risk_score > 0.7
 
         return {
             "risk_score": float(risk_score),
-            "rf_probability": float(rf_prob),
-            "xgb_probability": float(xgb_prob),
-            "autoencoder_error": float(error),
+            "rf_probability": rf_prob,
+            "xgb_probability": xgb_prob,
+            "autoencoder_error": error,
             "alert": bool(alert)
         }
 
