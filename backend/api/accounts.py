@@ -3,7 +3,7 @@ import pandas as pd
 import re
 from fastapi import APIRouter, Body
 
-from backend.services.state_manager import (
+from services.state_manager import (
     is_locked,
     get_lock_reason,
     is_otp_required

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 import json
 import os
 
-from backend.services.state_manager import (
+from services.state_manager import (
     lock_account,
     trigger_otp
 )
@@ -61,7 +61,7 @@ def api_otp(data: dict):
     user = data["user"]
     trigger_otp(user)
     return {"status": "otp_required", "user": user}
-from backend.services.state_manager import unlock_account, clear_otp
+from services.state_manager import unlock_account, clear_otp
 
 @router.post("/unlock_account")
 def api_unlock(data: dict):

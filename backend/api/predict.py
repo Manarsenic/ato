@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.services.predictor import predict_risk
+from services.predictor import predict_risk
 
 router = APIRouter()
 
