@@ -52,7 +52,10 @@ def predict_risk(data: dict):
         }
 
         # ✅ Create DataFrame with EXACT training columns
-        df = pd.DataFrame([mapped_data], columns=FEATURE_COLUMNS)
+        df = pd.DataFrame([mapped_data])
+
+# Force correct column order + missing handling
+        df = df.reindex(columns=FEATURE_COLUMNS)
 
         # ✅ Transform using preprocessor
         X_processed = preprocessor.transform(df)
