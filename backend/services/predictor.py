@@ -31,7 +31,7 @@ FEATURE_COLUMNS = [
 
 def predict_risk(data: dict):
 
-    # Extract timestamp
+    # Extract timestamp safely
     timestamp = data.get("timestamp")
     dt = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
@@ -53,20 +53,30 @@ def predict_risk(data: dict):
     }
 
     # Create dataframe
-    df = pd.DataFrame([[mapped_data[col] for col in FEATURE_COLUMNS]], columns=FEATURE_COLUMNS)
+    df = pd.DataFrame(
+        [[mapped_data[col] for col in FEATURE_COLUMNS]],
+        columns=FEATURE_COLUMNS
+    )
 
-    # Apply preprocessing to features
+    # Apply preprocessing
     X_processed = preprocessor.transform(df)
 
-# Random Forest
+    # ✅ Random Forest
     rf_prob = rf_model.predict_proba(X_processed)[0][1]
 
-# XGBoost
+    # ✅ XGBoost
     xgb_prob = xgb_model.predict_proba(X_processed)[0][1]
 
-    reconstructed = autoencoder.predict(X_processed)
-
-    error = np.mean((X_processed - reconstructed) ** 2)
+    # 🔥 Autoencoder (SAFE fallback)
+    if autoencoder is not None:
+        try:
+            reconstructed = autoencoder.predict(X_processed)
+            error = np.mean((X_processed - reconstructed) ** 2)
+        except Exception as e:
+            print("Autoencoder prediction failed:", e)
+            error = 0.0
+    else:
+        error = 0.0
 
     # Hybrid risk score
     risk_score = compute_risk_score(error, rf_prob, xgb_prob)
