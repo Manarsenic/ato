@@ -4,8 +4,8 @@ from datetime import datetime
 
 from services.model_loader import (
     rf_model,
-    xgb_model,
-    preprocessor
+    xgb_model
+    
 )
 
 from services.risk_engine import compute_risk_score
@@ -58,7 +58,7 @@ def predict_risk(data: dict):
         df = df.reindex(columns=FEATURE_COLUMNS)
 
         # ✅ Transform using preprocessor
-        X_processed = preprocessor.transform(df)
+        X_processed = df.values
 
         # ✅ Model predictions
         rf_prob = float(rf_model.predict_proba(X_processed)[0][1])
