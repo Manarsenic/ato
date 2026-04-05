@@ -2,14 +2,14 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
-from backend.services.model_loader import (
+from services.model_loader import (
     rf_model,
     xgb_model,
     autoencoder,
     preprocessor
 )
 
-from backend.services.risk_engine import compute_risk_score
+from services.risk_engine import compute_risk_score
 
 
 FEATURE_COLUMNS = [
