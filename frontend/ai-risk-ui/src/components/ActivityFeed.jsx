@@ -7,7 +7,7 @@ const [data,setData] = useState([])
 
 useEffect(()=>{
 
-axios.get("http://127.0.0.1:8000/accounts")
+axios.get("https://ato-22wq.onrender.com/accounts")
 .then(res=>{
 setData(res.data.accounts.slice(0,10))
 })

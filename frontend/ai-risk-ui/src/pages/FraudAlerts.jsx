@@ -16,7 +16,7 @@ const fetchAlerts = async () => {
 
 try{
 
-const res = await axios.get("http://127.0.0.1:8000/accounts")
+const res = await axios.get("https://ato-22wq.onrender.com/accounts")
 
 const topRisk = res.data.accounts
 .filter(a => a.risk_score >= 0.75)
@@ -84,7 +84,7 @@ const triggerOTP = async () => {
 if(!selected) return alert("Select user first")
 
 try{
-await axios.post("http://127.0.0.1:8000/trigger_otp",{
+await axios.post("https://ato-22wq.onrender.com/trigger_otp",{
 user: selected.user
 })
 
@@ -101,7 +101,7 @@ const lockAccount = async () => {
 if(!selected) return alert("Select user first")
 
 try{
-await axios.post("http://127.0.0.1:8000/lock_account",{
+await axios.post("https://ato-22wq.onrender.com/lock_account",{
 user: selected.user,
 reason: "High risk transaction detected"
 })
@@ -119,7 +119,7 @@ const unlockAccount = async () => {
 if(!selected) return alert("Select user first")
 
 try{
-await axios.post("http://127.0.0.1:8000/unlock_account",{
+await axios.post("https://ato-22wq.onrender.com/unlock_account",{
 user: selected.user
 })
 
@@ -138,7 +138,7 @@ if(!notes) return alert("Add investigation notes")
 
 try{
 
-await axios.post("http://127.0.0.1:8000/send_alert",{
+await axios.post("https://ato-22wq.onrender.com/send_alert",{
 user: selected.user,
 message: notes
 })

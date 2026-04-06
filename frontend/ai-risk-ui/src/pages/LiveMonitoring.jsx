@@ -10,7 +10,7 @@ const fetchData = async ()=>{
 
 try{
 
-const res = await axios.get("http://127.0.0.1:8000/accounts")
+const res = await axios.get("https://ato-22wq.onrender.com/accounts")
 
 setLogs(res.data.accounts.slice(0,20))
 

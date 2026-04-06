@@ -1,116 +1,105 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../services/api"; // ✅ use centralized API
 
-export default function Login(){
+export default function Login() {
+  const nav = useNavigate();
 
-const nav = useNavigate()
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const [user,setUser] = useState("")
-const [pass,setPass] = useState("")
-const [loading,setLoading] = useState(false)
+  async function handleLogin() {
+    setLoading(true);
 
-async function handleLogin(){
+    try {
+      // ✅ Use API instead of fetch + localhost
+      const res = await API.post("/login", {
+        user: user,
+        password: pass,
+      });
 
-setLoading(true)
+      const data = res.data;
 
-try{
+      // 🔒 ACCOUNT LOCKED
+      if (!data.success && data.message === "Account locked") {
+        alert(
+          `🔒 Your account is locked\n\nReason: ${data.reason}\n\nPlease contact admin.`
+        );
+        setLoading(false);
+        return;
+      }
 
-const res = await fetch("http://127.0.0.1:8000/login",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body: JSON.stringify({
-user:user,
-password:pass
-})
-})
+      // 🔐 OTP REQUIRED
+      if (!data.success && data.message === "OTP required") {
+        alert(
+          `🔐 Additional verification required\n\nPlease contact admin for access.`
+        );
+        setLoading(false);
+        return;
+      }
 
-const data = await res.json()
+      // ❌ INVALID LOGIN
+      if (!data.success) {
+        alert(data.message || "Login failed");
+        setLoading(false);
+        return;
+      }
 
-// 🔒 ACCOUNT LOCKED
-if(!data.success && data.message === "Account locked"){
-alert(
-`🔒 Your account is locked\n\nReason: ${data.reason}\n\nPlease contact admin.`
-)
-setLoading(false)
-return
-}
+      // ✅ SUCCESS LOGIN
+      if (data.role === "admin") {
+        nav("/admin");
+      } else {
+        localStorage.setItem("user_id", user);
+        nav("/user");
+      }
 
-// 🔐 OTP REQUIRED
-if(!data.success && data.message === "OTP required"){
-alert(
-`🔐 Additional verification required\n\nPlease contact admin for access.`
-)
-setLoading(false)
-return
-}
+    } catch (e) {
+      console.error("Login error:", e);
+      alert("Server error");
+    }
 
-// ❌ INVALID LOGIN
-if(!data.success){
-alert(data.message || "Login failed")
-setLoading(false)
-return
-}
+    setLoading(false);
+  }
 
-// ✅ SUCCESS LOGIN
-if(data.role==="admin"){
-nav("/admin")
-}else{
-localStorage.setItem("user_id", user)
-nav("/user")
-}
+  return (
+    <div className="login-wrapper">
+      <div className="login-card">
+        <h2>AI Risk</h2>
 
-}catch(e){
-alert("Server error")
-}
+        <p className="login-sub">
+          Account Security Intelligence Platform
+        </p>
 
-setLoading(false)
-}
+        <input
+          className="login-input"
+          placeholder="User ID"
+          value={user}
+          onChange={(e) => setUser(e.target.value)}
+        />
 
-return(
+        <input
+          className="login-input"
+          type="password"
+          placeholder="Password"
+          value={pass}
+          onChange={(e) => setPass(e.target.value)}
+        />
 
-<div className="login-wrapper">
+        <button
+          className="login-btn"
+          onClick={handleLogin}
+          disabled={loading}
+        >
+          {loading ? "Signing in..." : "Sign In"}
+        </button>
 
-<div className="login-card">
-
-<h2>AI Risk</h2>
-
-<p className="login-sub">
-Account Security Intelligence Platform
-</p>
-
-<input
-className="login-input"
-placeholder="User ID"
-value={user}
-onChange={e=>setUser(e.target.value)}
-/>
-
-<input
-className="login-input"
-type="password"
-placeholder="Password"
-value={pass}
-onChange={e=>setPass(e.target.value)}
-/>
-
-<button
-className="login-btn"
-onClick={handleLogin}
-disabled={loading}
->
-{loading ? "Signing in..." : "Sign In"}
-</button>
-
-<div className="demo">
-Admin → admin/admin123 <br/>
-Users → any user id + password user123 <br/>
-Example: user1 / user123
-</div>
-
-</div>
-
-</div>
-
-)
-
+        <div className="demo">
+          Admin → admin/admin123 <br />
+          Users → any user id + password user123 <br />
+          Example: user1 / user123
+        </div>
+      </div>
+    </div>
+  );
 }

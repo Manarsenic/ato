@@ -10,7 +10,7 @@ export default function UserDevices(){
   useEffect(()=>{
 
     axios
-      .get(`http://127.0.0.1:8000/accounts/${userId}`)
+      .get(`https://ato-22wq.onrender.com/accounts/${userId}`)
       .then(res=>{
         setData(res.data.accounts)
       })

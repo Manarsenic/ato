@@ -24,7 +24,7 @@ const [transactions,setTransactions] = useState([])
 
 useEffect(()=>{
 
-axios.get("http://127.0.0.1:8000/accounts")
+axios.get("https://ato-22wq.onrender.com/accounts")
 .then(res=>setTransactions(res.data.accounts))
 
 },[])

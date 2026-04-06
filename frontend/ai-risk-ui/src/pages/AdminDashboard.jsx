@@ -23,10 +23,10 @@ useEffect(()=>{
 async function loadData(){
 
 try{
-const statsRes = await axios.get("http://127.0.0.1:8000/stats")
+const statsRes = await axios.get("https://ato-22wq.onrender.com/stats")
 setStats(statsRes.data)
 
-const txRes = await axios.get("http://127.0.0.1:8000/accounts")
+const txRes = await axios.get("https://ato-22wq.onrender.com/accounts")
 setTransactions(txRes.data.accounts)
 }catch(e){
 console.log("Load error",e)
@@ -64,7 +64,7 @@ setSelectedUser(found)
 // 🔥 ACTIONS
 const lockUser = async () => {
 try{
-await axios.post("http://127.0.0.1:8000/lock_account",{
+await axios.post("https://ato-22wq.onrender.com/lock_account",{
 user: selectedUser.user,
 reason:"Admin manual lock"
 })
@@ -76,7 +76,7 @@ alert("Lock failed")
 
 const unlockUser = async () => {
 try{
-await axios.post("http://127.0.0.1:8000/unlock_account",{
+await axios.post("https://ato-22wq.onrender.com/unlock_account",{
 user: selectedUser.user
 })
 alert("User unlocked")
@@ -87,7 +87,7 @@ alert("Unlock failed")
 
 const triggerOTP = async () => {
 try{
-await axios.post("http://127.0.0.1:8000/trigger_otp",{
+await axios.post("https://ato-22wq.onrender.com/trigger_otp",{
 user: selectedUser.user
 })
 alert("OTP triggered")
@@ -112,7 +112,7 @@ return
 
 try{
 
-await axios.post("http://127.0.0.1:8000/send_alert",{
+await axios.post("https://ato-22wq.onrender.com/send_alert",{
 user: selectedUser.user,
 message: alertMsg,
 timestamp: new Date().toLocaleString()

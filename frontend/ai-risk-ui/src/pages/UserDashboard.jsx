@@ -19,7 +19,7 @@ useEffect(()=>{
 async function fetchData(){
 
 try{
-const res = await axios.get(`http://127.0.0.1:8000/accounts/${userId}`)
+const res = await axios.get(`https://ato-22wq.onrender.com/accounts/${userId}`)
 const data = res.data.accounts || []
 
 setActivity(data.slice(0,10))
@@ -34,7 +34,7 @@ console.log("Accounts error",e)
 }
 
 try{
-const al = await axios.get(`http://127.0.0.1:8000/alerts/${userId}`)
+const al = await axios.get(`https://ato-22wq.onrender.com/alerts/${userId}`)
 setAlerts(al.data.alerts || [])
 }catch(e){
 console.log("Alerts error",e)
@@ -153,7 +153,7 @@ className="bg-red-500 px-4 py-2 rounded"
 onClick={async ()=>{
 
 try{
-await axios.post("http://127.0.0.1:8000/lock_account",{
+await axios.post("https://ato-22wq.onrender.com/lock_account",{
 user: userId,
 reason: "User initiated account lock"
 })
@@ -176,7 +176,7 @@ className="bg-yellow-500 px-4 py-2 rounded text-black"
 onClick={async ()=>{
 
 try{
-await axios.post("http://127.0.0.1:8000/send_alert",{
+await axios.post("https://ato-22wq.onrender.com/send_alert",{
 user: userId,
 message: "User reported suspicious activity"
 })
@@ -196,7 +196,7 @@ Report Suspicious Activity
 {/* API */}
 <button
 className="bg-blue-500 px-4 py-2 rounded"
-onClick={()=>window.open("http://127.0.0.1:8000/docs")}
+onClick={()=>window.open("https://ato-22wq.onrender.com/docs")}
 >
 Security API
 </button>
