@@ -220,3 +220,17 @@ def risk_timeline(user_id: str):
         })
 
     return {"timeline": timeline}
+from services.state_manager import clear_otp
+
+from services.state_manager import clear_otp
+
+@router.post("/verify_otp")
+def verify_otp(data: dict):
+    user = data.get("user")
+    otp = data.get("otp")
+
+    if otp == "123456":
+        clear_otp(user)
+        return {"success": True}
+
+    return {"success": False}

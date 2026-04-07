@@ -147,27 +147,7 @@ alerts.map((a,i)=>(
 
 <div className="flex gap-4">
 
-{/* 🔒 LOCK ACCOUNT */}
-<button
-className="bg-red-500 px-4 py-2 rounded"
-onClick={async ()=>{
 
-try{
-await axios.post("https://ato-22wq.onrender.com/lock_account",{
-user: userId,
-reason: "User initiated account lock"
-})
-
-alert("Account locked successfully")
-
-}catch(e){
-alert("Lock failed")
-}
-
-}}
->
-Lock Account
-</button>
 
 
 {/* 🚨 REPORT */}

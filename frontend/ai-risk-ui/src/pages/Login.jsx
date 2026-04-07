@@ -1,52 +1,67 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../services/api"; // ✅ use centralized API
+import API from "../services/api";
 
 export default function Login() {
   const nav = useNavigate();
 
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
 
-  async function handleLogin() {
+  const [loading, setLoading] = useState(false);
+  const [otpRequired, setOtpRequired] = useState(false);
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
     try {
-      // ✅ Use API instead of fetch + localhost
+      // 🔐 OTP FLOW
+      if (otpRequired) {
+        const res = await API.post("/verify_otp", {
+          user,
+          otp
+        });
+
+        if (res.data.success) {
+          localStorage.setItem("user_id", user);
+          nav("/user");
+        } else {
+          alert("Invalid OTP");
+        }
+
+        setLoading(false);
+        return;
+      }
+
       const res = await API.post("/login", {
-        user: user,
+        user,
         password: pass,
       });
 
       const data = res.data;
 
-      // 🔒 ACCOUNT LOCKED
       if (!data.success && data.message === "Account locked") {
-        alert(
-          `🔒 Your account is locked\n\nReason: ${data.reason}\n\nPlease contact admin.`
-        );
+        alert(`🔒 Account locked\nReason: ${data.reason}`);
         setLoading(false);
         return;
       }
 
-      // 🔐 OTP REQUIRED
       if (!data.success && data.message === "OTP required") {
-        alert(
-          `🔐 Additional verification required\n\nPlease contact admin for access.`
-        );
+        setOtpRequired(true);
         setLoading(false);
         return;
       }
 
-      // ❌ INVALID LOGIN
       if (!data.success) {
         alert(data.message || "Login failed");
         setLoading(false);
         return;
       }
 
-      // ✅ SUCCESS LOGIN
       if (data.role === "admin") {
         nav("/admin");
       } else {
@@ -55,7 +70,6 @@ export default function Login() {
       }
 
     } catch (e) {
-      console.error("Login error:", e);
       alert("Server error");
     }
 
@@ -64,7 +78,8 @@ export default function Login() {
 
   return (
     <div className="login-wrapper">
-      <div className="login-card">
+      <form className="login-card" onSubmit={handleLogin}>
+
         <h2>AI Risk</h2>
 
         <p className="login-sub">
@@ -76,30 +91,38 @@ export default function Login() {
           placeholder="User ID"
           value={user}
           onChange={(e) => setUser(e.target.value)}
+          autoFocus
         />
 
-        <input
-          className="login-input"
-          type="password"
-          placeholder="Password"
-          value={pass}
-          onChange={(e) => setPass(e.target.value)}
-        />
+        {!otpRequired && (
+          <input
+            className="login-input"
+            type="password"
+            placeholder="Password"
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+          />
+        )}
 
-        <button
-          className="login-btn"
-          onClick={handleLogin}
-          disabled={loading}
-        >
-          {loading ? "Signing in..." : "Sign In"}
+        {otpRequired && (
+          <input
+            className="login-input"
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+          />
+        )}
+
+        <button type="submit" className="login-btn" disabled={loading}>
+          {loading ? "Processing..." : otpRequired ? "Verify OTP" : "Sign In"}
         </button>
 
         <div className="demo">
           Admin → admin/admin123 <br />
-          Users → any user id + password user123 <br />
-          Example: user1 / user123
+          Users → any user id + password user123
         </div>
-      </div>
+
+      </form>
     </div>
   );
 }

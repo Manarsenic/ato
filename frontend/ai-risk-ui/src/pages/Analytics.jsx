@@ -27,7 +27,7 @@ axios.get("https://ato-22wq.onrender.com/accounts")
 .then(res=>{
 
 // ✅ LIMIT DATA FOR CLEAN UI
-const limited = res.data.accounts.slice(0,200)
+const limited = res.data.accounts.slice(0,900)
 setTransactions(limited)
 
 })

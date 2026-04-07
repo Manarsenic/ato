@@ -243,10 +243,15 @@ Search & Manage User
 <div className="flex gap-4 mb-4">
 
 <input
-placeholder="Enter User ID"
-value={searchUser}
-onChange={e=>setSearchUser(e.target.value)}
-className="p-2 rounded w-full"
+  placeholder="Enter User ID"
+  value={searchUser}
+  onChange={e=>setSearchUser(e.target.value)}
+  onKeyDown={(e)=>{
+    if(e.key === "Enter"){
+      handleSearch()
+    }
+  }}
+  className="p-2 rounded w-full"
 />
 
 <button
