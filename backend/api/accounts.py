@@ -222,12 +222,17 @@ def risk_timeline(user_id: str):
     return {"timeline": timeline}
 from services.state_manager import clear_otp
 
-from services.state_manager import clear_otp
+from pydantic import BaseModel
+
+class OTPRequest(BaseModel):
+    user: str
+    otp: str
+
 
 @router.post("/verify_otp")
-def verify_otp(data: dict):
-    user = data.get("user")
-    otp = data.get("otp")
+def verify_otp(data: OTPRequest):
+    user = data.user
+    otp = data.otp
 
     if otp == "123456":
         clear_otp(user)
