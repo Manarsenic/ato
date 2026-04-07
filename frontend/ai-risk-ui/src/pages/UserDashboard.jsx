@@ -57,9 +57,10 @@ risk < 0.7 ? "text-yellow-500" :
 "text-red-500"
 
 const riskStatus =
-risk < 0.3 ? "SAFE" :
+risk < 0.40 ? "SAFE" :
 risk < 0.7 ? "MEDIUM RISK" :
-"HIGH RISK"
+risk <0.90 ? "HIGH RISK" :
+"CRITICAL RISK"
 
 return(
 

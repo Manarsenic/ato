@@ -226,7 +226,7 @@ Admin Security Dashboard
 </div>
 
 <div className="glass metric">
-<span>Active Alerts</span>
+<span>Critical Alerts</span>
 <b>{stats.alerts}</b>
 </div>
 
